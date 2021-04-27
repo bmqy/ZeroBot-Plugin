@@ -28,9 +28,14 @@ func init() { // 插件主体
 			ENABLE = false
 			ctx.SendChain(randText("Zzz……Zzz……"))
 		})
-	zero.OnKeywordGroup([]string{"萝卜子"}, AtriSwitch(), AtriSleep()).SetBlock(true).SetPriority(PRIO).
+	zero.OnFullMatch("萝卜子", AtriSwitch(), AtriSleep()).SetBlock(true).SetPriority(PRIO).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randText("萝卜子是对机器人的蔑称！", "是亚托莉......萝卜子可是对机器人的蔑称"))
+			switch rand.Intn(2) {
+			case 0:
+				ctx.SendChain(randText("萝卜子是对机器人的蔑称！", "是亚托莉......萝卜子可是对机器人的蔑称"))
+			case 1:
+				ctx.SendChain(randRecord("RocketPunch.amr"))
+			}
 		})
 	zero.OnKeywordGroup([]string{"喜欢", "爱你", "爱", "suki", "daisuki", "すき", "好き", "贴贴", "老婆", "亲一个", "mua"}, AtriSwitch(), AtriSleep(), zero.OnlyToMe).SetBlock(true).SetPriority(PRIO).
 		Handle(func(ctx *zero.Ctx) {
@@ -220,6 +225,11 @@ func randImage(file ...string) message.MessageSegment {
 	return message.Image(RES + file[rand.Intn(length)])
 }
 
+func randRecord(file ...string) message.MessageSegment {
+	length := len(file)
+	return message.Record(RES + file[rand.Intn(length)])
+}
+
 // AtriSwitch 控制 ATRI 的开关
 func AtriSwitch() zero.Rule {
 	return func(ctx *zero.Ctx) bool {
@@ -230,7 +240,7 @@ func AtriSwitch() zero.Rule {
 // AtriSleep 凌晨0点到6点，ATRI 在睡觉，不回应任何请求
 func AtriSleep() zero.Rule {
 	return func(ctx *zero.Ctx) bool {
-		if now := time.Now().Hour(); now < 6 {
+		if now := time.Now().Hour(); now >= 1 && now < 6 {
 			return false
 		}
 		return true
